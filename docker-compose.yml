@@ -1,0 +1,16 @@
+services:
+  fmcg-engine:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: uvicorn telegram_bot.webhook:app --host 0.0.0.0 --port 8000
+
+  crawler:
+    build: .
+    env_file:
+      - .env
+    command: python scripts/run_crawler.py
+    profiles:
+      - jobs
