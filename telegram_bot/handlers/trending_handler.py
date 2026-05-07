@@ -12,9 +12,6 @@ from telegram_bot.services.telegram_service import reject_if_not_allowed, split_
 async def trending(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await reject_if_not_allowed(update):
         return
-    await update.effective_message.reply_text(
-        "Saya crawl source publik dulu, lalu hitung trending signal terbaru."
-    )
     message = await asyncio.to_thread(trending_message)
     for chunk in split_long_message(message):
         await update.effective_message.reply_text(chunk)

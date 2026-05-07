@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from crawling_bot.services.price_analysis_service import calculate_price_movement
+from crawling_bot.services.price_snapshot_service import extract_price_candidates, parse_price
 
 
 def test_price_movement_calculates_daily_changes_and_summary() -> None:
@@ -10,6 +11,9 @@ def test_price_movement_calculates_daily_changes_and_summary() -> None:
             "product_name": "Minyak Goreng",
             "price": Decimal("15200"),
             "source_name": "Source A",
+            "source_url": "https://example.com/a",
+            "reference_label": "Source A - Minyak Goreng",
+            "reference_url": "https://example.com/a/minyak",
             "location": "Jakarta",
             "observed_at": datetime(2026, 4, 28, tzinfo=timezone.utc),
         },
@@ -47,3 +51,16 @@ def test_price_movement_calculates_daily_changes_and_summary() -> None:
     assert summary.highest_price == Decimal("16500.00")
     assert summary.lowest_price == Decimal("15200.00")
     assert summary.source_count == 3
+    assert summary.source_references[0].source_name == "Source A"
+    assert summary.source_references[0].reference_url == "https://example.com/a/minyak"
+
+
+def test_parse_price_accepts_rupiah_formats() -> None:
+    assert parse_price("Rp 16.900") == Decimal("16900")
+    assert parse_price("18.200") == Decimal("18200")
+
+
+def test_extract_price_candidates_requires_rupiah_context() -> None:
+    candidates = extract_price_candidates("Produk A harga Rp 16.900, kode barang 123456.")
+
+    assert candidates == [("Rp 16.900", Decimal("16900"))]

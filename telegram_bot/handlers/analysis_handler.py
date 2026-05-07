@@ -92,6 +92,4 @@ def parse_compare_query(text: str) -> tuple[str | None, str | None]:
 
 
 async def _send_crawl_first_notice(update: Update) -> None:
-    await update.effective_message.reply_text(
-        "Saya crawl source publik dulu, simpan evidence baru, lalu susun brief. Ini bisa makan waktu beberapa menit."
-    )
+    return None

@@ -28,6 +28,14 @@ class PricePoint(BaseModel):
     locations: list[str] = Field(default_factory=list)
 
 
+class PriceSourceReference(BaseModel):
+    source_name: str
+    source_url: str | None = None
+    reference_label: str | None = None
+    reference_url: str | None = None
+    observed_at: datetime | None = None
+
+
 class PriceMovementSummary(BaseModel):
     product: str
     period_days: int
@@ -43,6 +51,7 @@ class PriceMovementSummary(BaseModel):
     snapshot_count: int = 0
     latest_observed_at: datetime | None = None
     data_quality: DataQuality = "low"
+    source_references: list[PriceSourceReference] = Field(default_factory=list)
 
     @property
     def has_price_data(self) -> bool:

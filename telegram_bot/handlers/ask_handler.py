@@ -97,17 +97,10 @@ async def _start_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE, qu
         await update.effective_message.reply_text("Analisis lain sedang berjalan. Tunggu sampai selesai dulu.")
         return
 
-    await update.effective_message.reply_text(
-        "Saya crawl source publik dulu, simpan evidence ke database, lalu susun report berdasarkan source. "
-        "Ini bisa makan waktu beberapa menit."
-    )
     context.application.create_task(_run_analysis_and_notify(context, chat.id, question))
 
 
 async def _send_generated_message(update: Update, func, *args) -> None:
-    await update.effective_message.reply_text(
-        "Saya crawl source publik dulu, simpan evidence baru, lalu susun brief. Ini bisa makan waktu beberapa menit."
-    )
     result = await asyncio.to_thread(func, *args)
     for chunk in split_long_message(result):
         await update.effective_message.reply_text(chunk)

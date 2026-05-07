@@ -27,6 +27,7 @@ Build a crawling engine that collects public information, extracts business sign
 - Commodity news
 - Retail news
 - Government and public regulation news
+- Public retail or wholesale price pages when allowed and technically accessible
 
 Future sources:
 - Marketplace price tracking
@@ -62,23 +63,70 @@ Each insight must include what happened, why it happened when stated by the sour
 - Negative sentiment signal helps monitor brand demand risk.
 - Demand increase signal helps plan inventory allocation.
 
-## 10. System Architecture
+## 10. Price Information Rules
+
+When users ask about product prices, the system should prioritize stored price snapshots or newly crawled price pages from allowed public sources such as retail, wholesale, marketplace, official catalog, or manual/internal inputs.
+
+Price answers must be careful and data-oriented:
+
+- Show the source name.
+- Show the product name and pack size when available.
+- Show the observed price or price range when available.
+- Show the crawl or observation time.
+- State that the price is based on sources successfully checked, not a guaranteed market-wide price.
+- Do not claim the price is fully accurate for all suppliers, regions, or stores.
+
+If the system cannot find a usable price, the user-facing response should say:
+
+```text
+Maaf, kami belum berhasil menemukan harga untuk produk ini dari sumber yang kami cek.
+```
+
+If the user asked for a specific pack size or location, include it in the response:
+
+```text
+Maaf, kami belum berhasil menemukan harga gula 1 kg untuk wilayah yang Anda maksud dari sumber yang kami cek.
+```
+
+When price is unavailable, the answer can still continue with business context from news and public information:
+
+```text
+Untuk sementara, analisis ini memakai berita dan pembahasan publik yang berhasil kami temukan. Jadi rekomendasinya lebih cocok dipakai sebagai bahan pantauan, bukan sebagai patokan harga beli.
+```
+
+If price data is found during crawling even when the user did not explicitly ask for price, it can be included as a short supporting note, but it must not dominate the answer unless price is the user's main question.
+
+## 11. User-Facing Response Style
+
+User-facing responses should avoid internal technical labels such as `signal`, `signal_type`, `evidence_text`, or `source_coverage`. Those terms can remain inside the database and internal AI prompts, but users should receive natural business language.
+
+Preferred response language:
+
+- "tekanan harga naik" instead of `price_increase`
+- "risiko stok terbatas" instead of `shortage`
+- "permintaan mulai menguat" instead of `demand_increase`
+- "sumber yang dipakai" instead of `source_coverage`
+- "dasar informasi" instead of `evidence`
+
+For news, schedules, regulations, promotions, distribution updates, or official announcements, the response must include source references and explain why the information matters for the user's business.
+
+## 12. System Architecture
 
 Crawler -> Cleaner -> Relevance Filter -> Entity Extractor -> Signal Extractor -> Reason Extractor -> Scorer -> Neon PostgreSQL -> Gemini Polisher -> Telegram Bot
 
-## 11. Database Strategy
+## 13. Database Strategy
 
 Use Neon PostgreSQL. Direct connection is used for Alembic migrations and schema changes. Pooled connection is used for runtime services such as crawler, API, Telegram bot, and background jobs.
 
-## 12. Telegram Bot Strategy
+## 14. Telegram Bot Strategy
 
 Telegram acts as a lightweight user interface for alerts, reports, search, trending insights, and subscriptions. It is intentionally simple and operational, so users can act on high urgency signals quickly.
 
-## 13. AI Strategy
+## 15. AI Strategy
 
 Gemini is used only to polish language and generate clear business summaries from extracted structured data. It must not invent facts and must rely only on title, clean content, extracted signals, reason, evidence, and source references.
 
-## 14. Future Development
+## 16. Future Development
 
 - LLM-based extraction
 - pgvector semantic search

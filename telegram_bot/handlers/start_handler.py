@@ -13,6 +13,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.effective_message.reply_text(
         "FMCG Business Intelligence Bot aktif.\n"
         "Gunakan /analyze <pertanyaan>, /crawl, /insight <keyword>, /trend <keyword>, /forecast <keyword>, "
-        "/alert, /report, /search <keyword>, /trending, /subscribe, atau /unsubscribe.",
+        "/alert, /report, /search <keyword>, /trending, /price_check <produk>, /price_add, "
+        "/subscribe, /style <instruksi>, atau /unsubscribe.",
         reply_markup=main_menu_keyboard(),
     )

@@ -13,6 +13,21 @@ class Settings(BaseSettings):
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    gemini_model_fast: str = "gemini-2.5-flash-lite"
+
+    anthropic_api_key: str = ""
+    anthropic_model_primary: str = "claude-sonnet-4-20250514"
+    anthropic_model_fast: str = "claude-3-5-haiku-20241022"
+    anthropic_model_reviewer: str = "claude-3-5-haiku-20241022"
+
+    ai_primary_provider: str = "anthropic"
+    ai_fast_provider: str = "anthropic"
+    ai_extraction_provider: str = "gemini"
+    ai_review_provider: str = "anthropic"
+    ai_max_evidence_items: int = Field(default=8, ge=1, le=20)
+    ai_max_article_chars: int = Field(default=2500, ge=500, le=12000)
+    ai_response_timeout_seconds: int = Field(default=90, ge=5, le=180)
+    ai_enable_review: bool = True
 
     telegram_bot_token: str = ""
     telegram_webhook_url: str = ""

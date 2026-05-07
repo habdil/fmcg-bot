@@ -16,9 +16,6 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not keyword:
         await update.effective_message.reply_text("Gunakan format: /search <keyword>")
         return
-    await update.effective_message.reply_text(
-        "Saya crawl source publik dulu, simpan evidence baru, lalu cari insight terkait keyword."
-    )
     message = await asyncio.to_thread(search_message, keyword)
     for chunk in split_long_message(message):
         await update.effective_message.reply_text(chunk)

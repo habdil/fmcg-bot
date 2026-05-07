@@ -24,6 +24,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "/forecast <keyword> - Rule-based outlook and action\n"
         "/trending - Frequent entities and signals\n"
         "/subscribe - Subscribe current chat\n"
-        "/unsubscribe - Disable subscription",
+        "/unsubscribe - Disable subscription\n"
+        "/style <instruksi> - Simpan gaya jawaban bot\n"
+        "/forget_style - Hapus gaya jawaban tersimpan\n"
+        "/price_check <produk> - Cek data harga tersimpan\n"
+        "/price_add produk | harga | sumber | url | lokasi - Simpan harga manual\n"
+        "/price_collect produk | sumber | url | lokasi - Ambil harga dari URL yang diizinkan",
         reply_markup=main_menu_keyboard(),
     )

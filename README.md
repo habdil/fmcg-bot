@@ -101,6 +101,9 @@ Bot commands:
 - `/compare <product A> | <product B>`
 - `/forecast <keyword>`
 - `/trending`
+- `/price_check <product>` or `/harga <product>`
+- `/price_add <product> | <price> | <source> | <url> | <location>`
+- `/price_collect <product> | <source> | <url> | <location>`
 - `/subscribe`
 - `/unsubscribe`
 
@@ -115,6 +118,8 @@ Tolong analisis produk minyak kita 2 liter
 /weekly
 /compare minyak goreng | gula
 /forecast susu
+/price_add gula pasir 1 kg | 16900 | Katalog Supplier A | https://example.com/gula | Jakarta
+/harga gula pasir 1 kg
 ```
 
 Analyst commands use a crawl-first flow by default because early databases may still have limited evidence. The bot crawls a small batch of public sources, stores fresh evidence in PostgreSQL, then reads the structured signals for the response.
@@ -196,6 +201,16 @@ Total movement:
 ```
 
 Do not add exact price statements unless the value exists in `product_price_snapshots`.
+
+Telegram price snapshot commands:
+
+```powershell
+/price_add gula pasir 1 kg | 16900 | Katalog Supplier A | https://example.com/gula | Jakarta
+/price_collect gula pasir 1 kg | Katalog Supplier A | https://example.com/gula | Jakarta
+/price_check gula pasir 1 kg
+```
+
+`/price_add` stores a manual price snapshot with source reference. `/price_collect` fetches an allowed product/catalog URL supplied by the user and stores the first detected Rupiah price as a snapshot. Use only pages that are allowed to be checked and keep source URL/reference populated for auditability.
 
 ## Example Analyst Responses
 

@@ -420,6 +420,15 @@ def _format_price_movement(price_summary: PriceMovementSummary) -> str:
             f"Kualitas data: {price_summary.data_quality.upper()}",
         ]
     )
+    if price_summary.source_references:
+        lines.extend(["", "Sumber harga:"])
+        for reference in price_summary.source_references[:5]:
+            label = reference.reference_label or reference.source_name
+            observed = f" | Diambil: {_format_datetime(reference.observed_at)}" if reference.observed_at else ""
+            lines.append(f"- {label}{observed}")
+            url = reference.reference_url or reference.source_url
+            if url:
+                lines.append(f"  {url}")
     return "\n".join(lines)
 
 

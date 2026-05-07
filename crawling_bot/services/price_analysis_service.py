@@ -8,7 +8,12 @@ from typing import Any, Iterable
 from sqlalchemy import or_, select
 
 from crawling_bot.database import session_scope
-from crawling_bot.schemas.price_schema import AvailabilitySummary, PriceMovementSummary, PricePoint
+from crawling_bot.schemas.price_schema import (
+    AvailabilitySummary,
+    PriceMovementSummary,
+    PricePoint,
+    PriceSourceReference,
+)
 from database_migration.models.product import (
     Product,
     ProductAvailabilitySnapshot,
@@ -39,6 +44,8 @@ def calculate_price_movement(
     daily_locations: dict[date, set[str]] = defaultdict(set)
     all_prices: list[Decimal] = []
     all_sources: set[str] = set()
+    source_references: list[PriceSourceReference] = []
+    seen_references: set[str] = set()
     latest_observed_at: datetime | None = None
 
     for row in rows:
@@ -55,6 +62,21 @@ def calculate_price_movement(
         if source_name:
             daily_sources[observed_date].add(source_name)
             all_sources.add(source_name)
+            source_url = _string_or_none(_field(row, "source_url"))
+            reference_url = _string_or_none(_field(row, "reference_url"))
+            reference_label = _string_or_none(_field(row, "reference_label"))
+            reference_key = f"{source_name}|{reference_url or source_url or reference_label or ''}"
+            if reference_key not in seen_references:
+                source_references.append(
+                    PriceSourceReference(
+                        source_name=source_name,
+                        source_url=source_url,
+                        reference_label=reference_label,
+                        reference_url=reference_url,
+                        observed_at=observed_at,
+                    )
+                )
+                seen_references.add(reference_key)
 
         location = str(_field(row, "location") or "").strip()
         if location:
@@ -112,6 +134,7 @@ def calculate_price_movement(
         snapshot_count=len(all_prices),
         latest_observed_at=latest_observed_at,
         data_quality=_price_data_quality(len(points), len(all_prices), len(all_sources)),
+        source_references=source_references[:10],
     )
 
 
@@ -278,6 +301,11 @@ def _int_value(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _string_or_none(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text or None
 
 
 def _money(value: Decimal) -> Decimal:
