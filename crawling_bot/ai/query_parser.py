@@ -57,9 +57,9 @@ class AnalystQueryParser:
             from google.genai import types
 
             prompt = (
-                "Parse this Indonesian/English FMCG business question into structured fields. "
-                "Return only the schema. Normalize product names for FMCG distribution. "
-                "If user says 'minyak' in FMCG context, normalize to 'minyak goreng'. "
+                "Parse this Indonesian/English MSME business question into structured fields. "
+                "Return only the schema. Normalize product names for Indonesian UMKM business context. "
+                "If user says 'minyak' in a cooking or retail context, normalize to 'minyak goreng'. "
                 "Do not invent exact pack size if absent.\n\n"
                 f"Question: {question}"
             )

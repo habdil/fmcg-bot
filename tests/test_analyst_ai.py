@@ -30,6 +30,6 @@ def test_answer_composer_fallback_mentions_pack_size_limitation() -> None:
 
     answer = GroundedAnswerComposer(api_key="").compose(query, rows)
 
-    assert "FMCG Intelligence Report" in answer
+    assert "Sorota Business Insight" in answer
     assert "2 liter" in answer
     assert "Test Source" in answer

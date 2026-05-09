@@ -5,23 +5,25 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from telegram import Update
 
-from telegram_bot.main import build_application
+from telegram_bot.main import build_application, setup_runtime, shutdown_runtime
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     telegram_app = build_application()
     await telegram_app.initialize()
+    await setup_runtime(telegram_app)
     await telegram_app.start()
     app.state.telegram_app = telegram_app
     try:
         yield
     finally:
+        await shutdown_runtime(telegram_app)
         await telegram_app.stop()
         await telegram_app.shutdown()
 
 
-app = FastAPI(title="FMCG Intelligence Telegram Webhook", lifespan=lifespan)
+app = FastAPI(title="Sorota Business Assistant Telegram Webhook", lifespan=lifespan)
 
 
 @app.get("/health")

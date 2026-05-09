@@ -36,19 +36,14 @@ async def _run_analysis_and_notify(
                 evidence_limit=20,
             )
 
-        total_found = sum(item.total_found for item in result.crawl_stats)
-        total_saved = sum(item.total_saved for item in result.crawl_stats)
-        total_processed = sum(item.total_processed for item in result.crawl_stats)
-        header = (
-            f"Analisis selesai untuk: {result.query.normalized_keyword}\n"
-            f"Crawl terbaru: {total_found} artikel ditemukan, {total_processed} relevan, {total_saved} baru disimpan.\n"
-            f"Evidence dipakai untuk brief: {result.evidence_count} signal.\n"
-            "Catatan: kalau artikel baru tersimpan 0, brief tetap memakai evidence relevan yang sudah ada di database.\n\n"
-        )
+        header = f"Aku rangkum untuk: {result.query.normalized_keyword}\n\n"
         for chunk in split_long_message(header + result.answer):
             await context.bot.send_message(chat_id=chat_id, text=chunk)
     except Exception as exc:
-        await context.bot.send_message(chat_id=chat_id, text=f"Analisis gagal: {exc}")
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="Maaf, analisisnya belum berhasil aku proses. Coba ulang sebentar lagi ya.",
+        )
 
 
 async def analyze(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -72,7 +67,7 @@ async def free_text_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     question = message.text.strip()
     if len(question) < 4:
-        await message.reply_text("Tulis pertanyaan lebih spesifik, atau gunakan /menu.")
+        await message.reply_text("Tulis sedikit lebih lengkap ya. Contoh: produk mana yang perlu saya push minggu ini?")
         return
     lower = question.lower()
     if _is_daily_trend_query(lower):
@@ -94,9 +89,10 @@ async def _start_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE, qu
     if chat is None:
         return
     if ANALYZE_LOCK.locked():
-        await update.effective_message.reply_text("Analisis lain sedang berjalan. Tunggu sampai selesai dulu.")
+        await update.effective_message.reply_text("Aku masih menyelesaikan analisis sebelumnya. Tunggu sebentar ya.")
         return
 
+    await update.effective_message.reply_text("Sebentar, aku cek konteks pasar yang relevan dulu.")
     context.application.create_task(_run_analysis_and_notify(context, chat.id, question))
 
 

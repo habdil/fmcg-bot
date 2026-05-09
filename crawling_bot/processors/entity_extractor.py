@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Dict, List
 
-from crawling_bot.processors.relevance_filter import FMCG_ENTITIES, find_hits
+from crawling_bot.processors.relevance_filter import BUSINESS_ENTITIES, find_hits
 from crawling_bot.schemas.entity_schema import EntityItem
 
 
@@ -71,8 +71,8 @@ def extract_entities(title: str, content: str) -> Dict[str, List[EntityItem]]:
     text = f"{title} {content}"
     result: dict[str, list[EntityItem]] = defaultdict(list)
     result["product"].extend(_items(find_hits(text, PRODUCTS), "product", 0.75))
-    result["company"].extend(_items(find_hits(text, FMCG_ENTITIES), "company", 0.7))
-    result["brand"].extend(_items(find_hits(text, FMCG_ENTITIES), "brand", 0.65))
+    result["company"].extend(_items(find_hits(text, BUSINESS_ENTITIES), "company", 0.7))
+    result["brand"].extend(_items(find_hits(text, BUSINESS_ENTITIES), "brand", 0.65))
     result["location"].extend(_items(find_hits(text, LOCATIONS), "location", 0.65))
     result["commodity"].extend(_items(find_hits(text, COMMODITIES), "commodity", 0.7))
     return dict(result)

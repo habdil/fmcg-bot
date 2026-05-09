@@ -87,11 +87,11 @@ def format_product_deep_analysis(
     limitations = _limitations(rows, price_summary, availability_summary, source_coverage)
 
     lines = [
-        f"📊 Brief Intelijen FMCG: {_title(product)}",
+        f"Brief Keputusan Bisnis Sorota: {_title(product)}",
         f"Periode: {period_days} hari terakhir",
         f"Status: {status} | Confidence: {confidence}% | Data: {data_quality}",
         "",
-        "🧠 Ringkasan untuk BA",
+        "Ringkasan untuk Owner",
         _executive_summary(product, rows, price_summary, availability_summary, data_quality),
         "",
         "📌 Signal Utama",
@@ -116,7 +116,7 @@ def format_product_deep_analysis(
         "🔎 Kenapa Ini Terjadi",
         _format_reason_analysis(rows),
         "",
-        "💼 Dampak untuk Sub-Distributor",
+        "Dampak untuk UMKM",
         _format_business_impact(counts, price_summary, availability_summary),
         "",
         "🎯 Rekomendasi",
@@ -141,7 +141,7 @@ def format_daily_trend_brief(
     report_date = report_date or datetime.now(timezone.utc).date()
     if not rows:
         return (
-            "🔥 FMCG Daily Trend Brief\n"
+            "Sorota Daily Business Brief\n"
             f"Date: {_format_date(report_date)}\n"
             "Data Coverage: belum ada signal hari ini.\n"
             "Confidence: LOW\n\n"
@@ -156,7 +156,7 @@ def format_daily_trend_brief(
     counts = _signal_counts(rows)
     quality = _data_quality_label(rows, None, source_coverage)
     lines = [
-        "🔥 FMCG Daily Trend Brief",
+        "Sorota Daily Business Brief",
         f"Date: {_format_date(report_date)}",
         f"Data Coverage: {source_coverage.total_relevant_articles} artikel relevan dari {_format_source_names(source_coverage.source_names)}",
         f"Confidence: {quality}",
@@ -200,11 +200,11 @@ def format_weekly_intelligence_report(
     quality = _data_quality_label(rows, None, source_coverage)
     if not rows:
         return (
-            "📈 Weekly FMCG Intelligence Report\n"
+            "Sorota Weekly Business Report\n"
             f"Period: {period_label}\n"
             "Confidence: LOW\n\n"
             "Executive Summary\n"
-            "Belum ada signal mingguan yang cukup untuk membuat laporan source-grounded.\n\n"
+            "Belum ada temuan mingguan yang cukup untuk membuat laporan berbasis sumber.\n\n"
             "Top Weekly Movements:\n- Belum tersedia.\n\n"
             "Week-over-Week Insight:\n"
             "Data pembanding belum tersedia.\n\n"
@@ -216,7 +216,7 @@ def format_weekly_intelligence_report(
     grouped = _group_rows_by_product(rows)
     previous_counts = Counter(_row_product(row) for row in previous_rows)
     lines = [
-        "📈 Weekly FMCG Intelligence Report",
+        "Sorota Weekly Business Report",
         f"Period: {period_label}",
         f"Confidence: {quality}",
         "",
@@ -266,7 +266,7 @@ def format_early_warning_alert(row: dict[str, Any]) -> str:
     detected_at = _row_datetime(row)
     source = f"{row.get('source_name') or '-'} - {_clean_text(row.get('title') or '-', 120)}"
     return (
-        "🚨 FMCG Early Warning Alert\n"
+        "Sorota Early Warning Alert\n"
         f"Urgency: {str(row.get('urgency') or 'high').upper()}\n"
         f"Product: {_title(product)}\n"
         f"Signal: {row.get('signal_type') or '-'}\n"
@@ -277,7 +277,7 @@ def format_early_warning_alert(row: dict[str, Any]) -> str:
         "Why It Matters:\n"
         f"{row.get('explanation') or _short_business_implication(_signal_counts([row]))}\n\n"
         "Evidence:\n"
-        f"{_clean_text(row.get('evidence_text') or 'Evidence text belum tersedia di record signal.', 260)}\n\n"
+        f"{_clean_text(row.get('evidence_text') or 'Detail pendukung belum tersedia.', 260)}\n\n"
         "Potential Business Impact:\n"
         f"{_short_business_implication(_signal_counts([row]))}\n\n"
         "Recommended Action:\n"
@@ -298,7 +298,7 @@ def format_search_results(
 ) -> str:
     if not rows:
         return (
-            "🔍 FMCG Insight Search Result\n"
+            "Sorota Insight Search Result\n"
             f"Query: {query}\n"
             "Results Found: 0\n\n"
             "Tidak ada strong data yang ditemukan. Jalankan crawler, gunakan keyword lebih umum, "
@@ -306,7 +306,7 @@ def format_search_results(
         )
 
     lines = [
-        "🔍 FMCG Insight Search Result",
+        "Sorota Insight Search Result",
         f"Query: {query}",
         f"Results Found: {len(rows)}",
         "",
@@ -355,7 +355,7 @@ def format_comparative_analysis(
     )
 
     lines = [
-        "⚖️ FMCG Comparative Analysis",
+        "Sorota Comparative Analysis",
         f"Products: {_title(product_a)} vs {_title(product_b)}",
         f"Period: Last {period_days} Days",
         "",
@@ -488,7 +488,7 @@ def _format_business_impact(
 ) -> str:
     impacts: list[str] = []
     if price_summary and price_summary.trend_direction == "increasing":
-        impacts.append("Margin sub-distributor berpotensi tertekan jika harga supplier naik lebih cepat dari harga jual.")
+        impacts.append("Margin UMKM berpotensi tertekan jika harga supplier naik lebih cepat dari harga jual.")
     if counts["price_increase"] > counts["price_decrease"]:
         impacts.append("Perlu skenario adjustment margin dan komunikasi harga ke pelanggan prioritas.")
     if counts["shortage"] or counts["distribution_disruption"] or (availability and availability.availability_signal in {"limited", "out_of_stock"}):
@@ -623,7 +623,7 @@ def _signal_counts(rows: list[dict[str, Any]]) -> Counter[str]:
 
 
 def _row_product(row: dict[str, Any]) -> str:
-    return str(row.get("product") or row.get("company") or row.get("location") or "FMCG general")
+    return str(row.get("product") or row.get("company") or row.get("location") or "bisnis umum")
 
 
 def _row_datetime(row: dict[str, Any]) -> datetime | None:
@@ -781,7 +781,7 @@ def _market_direction_note(counts: Counter[str]) -> str:
         pressure.append("sentiment negatif")
     if not pressure:
         return "Arah pasar belum kuat dari evidence hari ini; monitoring tetap diperlukan."
-    return "Pasar FMCG terindikasi memiliki " + ", ".join(pressure) + "."
+    return "Pasar UMKM terindikasi memiliki " + ", ".join(pressure) + "."
 
 
 def _week_over_week_note(rows: list[dict[str, Any]], previous_rows: list[dict[str, Any]]) -> str:
@@ -789,7 +789,7 @@ def _week_over_week_note(rows: list[dict[str, Any]], previous_rows: list[dict[st
         return "Previous period data belum tersedia, sehingga week-over-week comparison masih terbatas."
     delta = len(rows) - len(previous_rows)
     direction = "lebih tinggi" if delta > 0 else "lebih rendah" if delta < 0 else "relatif sama"
-    return f"Jumlah signal minggu ini {direction} dibanding periode sebelumnya ({len(rows)} vs {len(previous_rows)} signal)."
+    return f"Jumlah temuan minggu ini {direction} dibanding periode sebelumnya ({len(rows)} vs {len(previous_rows)} temuan)."
 
 
 def _signal_price_phrase(counts: Counter[str]) -> str:

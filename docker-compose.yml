@@ -1,5 +1,5 @@
 services:
-  fmcg-engine:
+  sorota-engine:
     build: .
     env_file:
       - .env

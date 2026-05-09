@@ -11,7 +11,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await reject_if_not_allowed(update):
         return
     await update.effective_message.reply_text(
-        "FMCG Business Intelligence Bot aktif.\n"
+        "Sorota Business Assistant aktif.\n"
+        "Kamu bisa langsung chat untuk cek margin, HPP, stok, reminder, atau brief harian.\n"
         "Gunakan /analyze <pertanyaan>, /crawl, /insight <keyword>, /trend <keyword>, /forecast <keyword>, "
         "/alert, /report, /search <keyword>, /trending, /price_check <produk>, /price_add, "
         "/subscribe, /style <instruksi>, atau /unsubscribe.",

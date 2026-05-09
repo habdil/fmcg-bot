@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from chat_engine.ai.base import AIProvider
 from chat_engine.ai.router import AIRouter
@@ -10,6 +11,7 @@ from crawling_bot.ai.query_parser import AnalystQueryParser
 logger = logging.getLogger(__name__)
 
 PRICE_TERMS = ["harga", "price", "berapa", "kisaran", "rp", "rupiah"]
+CALCULATION_TERMS = ["hpp", "modal", "margin", "markup", "laba", "untung", "profit", "harga jual"]
 SUPPLY_TERMS = ["stok", "stock", "pasokan", "supply", "kelangkaan", "langka"]
 DEMAND_TERMS = ["demand", "permintaan", "ramai", "laris", "hype"]
 REGULATION_TERMS = ["aturan", "regulasi", "kebijakan", "pemerintah", "larangan", "pajak"]
@@ -24,7 +26,9 @@ class QueryPlanner:
 
     def plan(self, question: str, user_context: UserContext | None = None) -> ChatQueryPlan:
         fallback = self._fallback(question, user_context)
-        if _is_latest_news_query(question):
+        # Fast path: skip AI call untuk query yang intentnya sudah jelas
+        # dari keyword matching → hemat 1-3 detik per pesan
+        if _is_latest_news_query(question) or _has_clear_intent(question):
             return fallback
         if not self.provider.is_configured:
             return fallback
@@ -59,7 +63,10 @@ class QueryPlanner:
         parsed = self.fallback_parser.parse(question)
         lowered = question.lower()
         intent = _map_intent(parsed.intent)
-        if any(term in lowered for term in PRICE_TERMS):
+        is_business_calculation = _looks_like_business_calculation(lowered)
+        if is_business_calculation:
+            intent = "recommendation"
+        elif any(term in lowered for term in PRICE_TERMS):
             intent = "price"
         elif any(term in lowered for term in SUPPLY_TERMS):
             intent = "supply"
@@ -94,8 +101,8 @@ class QueryPlanner:
             pack_size=parsed.pack_size,
             location=parsed.location or (user_context.location if user_context else None),
             search_terms=list(dict.fromkeys(term for term in terms if term)),
-            crawl_needed=True,
-            price_snapshot_needed=intent == "price",
+            crawl_needed=not is_business_calculation,
+            price_snapshot_needed=intent == "price" and not is_business_calculation,
             response_style=(user_context.response_style if user_context and user_context.response_style in {"short", "normal", "detailed", "ba_report"} else "normal"),  # type: ignore[arg-type]
         )
 
@@ -108,6 +115,23 @@ def _map_intent(value: str) -> str:
     if value in {"analysis", "price", "supply", "demand", "sentiment"}:
         return value
     return "analysis"
+
+
+def _has_clear_intent(question: str) -> bool:
+    """Return True jika intent sudah jelas dari keyword — tidak perlu AI parse."""
+    lowered = question.lower()
+    has_price = any(t in lowered for t in PRICE_TERMS)
+    has_calculation = _looks_like_business_calculation(lowered)
+    has_supply = any(t in lowered for t in SUPPLY_TERMS)
+    has_demand = any(t in lowered for t in DEMAND_TERMS)
+    has_regulation = any(t in lowered for t in REGULATION_TERMS)
+    return has_calculation or has_price or has_supply or has_demand or has_regulation
+
+
+def _looks_like_business_calculation(lowered: str) -> bool:
+    has_calc_term = any(term in lowered for term in CALCULATION_TERMS)
+    money_like_count = len(re.findall(r"(?:rp\.?\s*)?\d[\d.,]{2,}", lowered))
+    return has_calc_term and money_like_count >= 2
 
 
 def _is_latest_news_query(value: str) -> bool:

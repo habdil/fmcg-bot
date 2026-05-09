@@ -12,7 +12,7 @@ from crawling_bot.main import run_crawler
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run FMCG crawling pipeline.")
+    parser = argparse.ArgumentParser(description="Run Sorota business crawling pipeline.")
     parser.add_argument("--max", type=int, default=None, help="Maximum articles per source.")
     args = parser.parse_args()
 

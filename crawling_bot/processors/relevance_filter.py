@@ -5,12 +5,36 @@ from dataclasses import dataclass
 from typing import Iterable
 
 
-FMCG_KEYWORDS = [
-    "fmcg",
-    "fast moving consumer goods",
+BUSINESS_KEYWORDS = [
+    "umkm",
+    "bisnis",
+    "usaha",
+    "harga",
+    "harga jual",
+    "hpp",
+    "margin",
+    "markup",
+    "supplier",
+    "kompetitor",
+    "pesaing",
+    "restock",
+    "produk",
+    "kuliner",
+    "warung",
+    "toko kelontong",
+    "coffee shop",
+    "laundry",
+    "fashion",
+    "reseller",
+    "kemasan",
     "barang konsumsi",
     "makanan",
     "minuman",
+    "ayam",
+    "telur",
+    "kopi",
+    "cabe",
+    "bawang",
     "sembako",
     "minyak goreng",
     "gula",
@@ -41,7 +65,13 @@ FMCG_KEYWORDS = [
     "konsumsi rumah tangga",
 ]
 
-FMCG_ENTITIES = [
+BUSINESS_ENTITIES = [
+    "klikindogrosir",
+    "tokopedia",
+    "shopee",
+    "indogrosir",
+    "pasar induk",
+    "pihps",
     "unilever",
     "indofood",
     "mayora",
@@ -84,9 +114,9 @@ def find_hits(text: str, phrases: Iterable[str]) -> list[str]:
 
 
 def score_relevance(title: str, content: str) -> RelevanceResult:
-    title_hits = find_hits(title, FMCG_KEYWORDS)
-    content_hits = find_hits(content, FMCG_KEYWORDS)
-    entity_hits = find_hits(f"{title} {content}", FMCG_ENTITIES)
+    title_hits = find_hits(title, BUSINESS_KEYWORDS)
+    content_hits = find_hits(content, BUSINESS_KEYWORDS)
+    entity_hits = find_hits(f"{title} {content}", BUSINESS_ENTITIES)
 
     keyword_hits = sorted(set(title_hits + content_hits))
     title_component = min(len(title_hits) * 0.18, 0.36)

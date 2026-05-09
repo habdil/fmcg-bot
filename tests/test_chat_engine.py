@@ -83,8 +83,26 @@ def test_chat_engine_price_question_uses_price_not_found_fallback() -> None:
     assert result.guard.is_business_related
     assert result.plan is not None
     assert result.plan.price_snapshot_needed
-    assert "Maaf, kami belum berhasil menemukan harga" in result.answer
-    assert "patokan harga beli" in result.answer
+    assert "Aku belum menemukan harga gula 1 kg" in result.answer
+    assert "quotation langsung" in result.answer
+    assert "Marketplace B2B" not in result.answer
+
+
+def test_chat_engine_margin_question_uses_local_calculator_without_crawl() -> None:
+    crawl_calls: list[tuple[int | None, int | None]] = []
+    engine = _engine(rows=[], crawl_calls=crawl_calls)
+
+    result = engine.handle_message(
+        "Kalau HPP ayam geprek Rp. 11.500 dan jual Rp. 18.000, masih aman??",
+        crawl_first=True,
+    )
+
+    assert result.plan is not None
+    assert result.plan.intent == "recommendation"
+    assert result.plan.price_snapshot_needed is False
+    assert crawl_calls == []
+    assert "Margin kotornya sekitar 36,1%" in result.answer
+    assert "laba kotor Rp 6.500" in result.answer
 
 
 def test_chat_engine_business_answer_uses_natural_language_without_internal_terms() -> None:
@@ -111,6 +129,9 @@ def test_chat_engine_business_answer_uses_natural_language_without_internal_term
 
     assert "tekanan harga naik" in result.answer
     assert "Sumber" in result.answer
+    assert "Pasokan dan permintaan" not in result.answer
+    assert "Kenapa ini penting" not in result.answer
+    assert len([line for line in result.answer.splitlines() if line.strip()]) <= 5
     lowered = result.answer.lower()
     assert "signal" not in lowered
     assert "source coverage" not in lowered
@@ -145,12 +166,12 @@ def test_chat_engine_latest_news_formats_headlines_from_recent_rows() -> None:
     assert result.plan is not None
     assert result.plan.intent == "daily_brief"
     assert result.plan.search_terms == []
-    assert crawl_calls == [(1, 5)]
-    assert "Berita terbaru bisnis dan FMCG" in result.answer
+    assert crawl_calls == [(1, 4)]
+    assert "Update terbaru bisnis UMKM" in result.answer
     assert "Headline" not in result.answer
     assert "Harga gula naik di pasar tradisional" in result.answer
-    assert "Intinya: Harga gula naik karena pasokan terbatas." in result.answer
-    assert "Sumber: Test Bisnis" in result.answer
+    assert "Harga gula naik karena pasokan terbatas." in result.answer
+    assert "(Test Bisnis)" in result.answer
 
 
 def test_chat_engine_price_answer_includes_observed_range_when_available() -> None:
@@ -179,9 +200,8 @@ def test_chat_engine_price_answer_includes_observed_range_when_available() -> No
 
     result = engine.handle_message("Harga gula hari ini?", crawl_first=False)
 
-    assert "Harga yang berhasil kami pantau" in result.answer
+    assert "data harga pembanding" in result.answer
     assert "Rp 16.900" in result.answer
     assert "Rp 18.200" in result.answer
-    assert "Sumber harga" in result.answer
-    assert "https://example.com/gula" in result.answer
-    assert "pembanding awal" in result.answer
+    assert "minta harga final ke supplier" in result.answer
+    assert "https://example.com/gula" not in result.answer

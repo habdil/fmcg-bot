@@ -4,7 +4,8 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Index, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,14 +13,20 @@ from database_migration.models.base import Base, TimestampMixin, UUIDPrimaryKeyM
 
 
 class Article(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    __tablename__ = "articles"
+    __tablename__ = "crawled_documents"
+    __table_args__ = (
+        Index("ix_crawled_documents_published_at", "published_at"),
+        Index("ix_crawled_documents_crawled_at", "crawled_at"),
+        Index("ix_crawled_documents_category", "category"),
+    )
 
     source_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
-        ForeignKey("sources.id", ondelete="CASCADE"),
+        ForeignKey("market_sources.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
+    document_type: Mapped[str] = mapped_column(String(50), default="article", nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
     url: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     raw_content: Mapped[Optional[str]] = mapped_column(Text)
@@ -41,6 +48,7 @@ class Article(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     confidence_score: Mapped[float] = mapped_column(Float, default=0, nullable=False)
     urgency: Mapped[str] = mapped_column(String(20), default="low", nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSONB)
 
     source: Mapped["Source"] = relationship(back_populates="articles")
     article_entities: Mapped[List["ArticleEntity"]] = relationship(

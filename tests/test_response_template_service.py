@@ -41,7 +41,7 @@ def test_product_template_states_missing_price_data() -> None:
         source_coverage=coverage,
     )
 
-    assert "📊 Brief Intelijen FMCG" in message
+    assert "Brief Keputusan Bisnis Sorota" in message
     assert DETAILED_PRICE_MISSING in message
     assert "Kenapa Ini Terjadi" in message
     assert "Sumber & Coverage" in message
@@ -64,7 +64,7 @@ def test_alert_format_contains_required_sections() -> None:
 
     message = format_early_warning_alert(row)
 
-    assert "🚨 FMCG Early Warning Alert" in message
+    assert "Sorota Early Warning Alert" in message
     assert "Evidence:" in message
     assert "Recommended Action:" in message
     assert "Harga gula naik karena pasokan terbatas." in message
@@ -85,7 +85,7 @@ def test_search_template_formats_results() -> None:
 
     message = format_search_results(query="susu", rows=rows, source_coverage=build_source_coverage(rows))
 
-    assert "🔍 FMCG Insight Search Result" in message
+    assert "Sorota Insight Search Result" in message
     assert "Results Found: 1" in message
     assert "Demand susu meningkat" in message
 
@@ -121,7 +121,7 @@ def test_compare_template_formats_price_and_risk() -> None:
         availability_b=AvailabilitySummary(product="gula", period_days=7),
     )
 
-    assert "⚖️ FMCG Comparative Analysis" in message
+    assert "Sorota Comparative Analysis" in message
     assert "Price Movement" in message
     assert "Minyak Goreng" in message
     assert DETAILED_PRICE_MISSING in message

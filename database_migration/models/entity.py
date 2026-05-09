@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, Float, ForeignKey, Index, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,9 +12,10 @@ from database_migration.models.base import Base, UUIDPrimaryKeyMixin, utc_now
 
 
 class Entity(UUIDPrimaryKeyMixin, Base):
-    __tablename__ = "entities"
+    __tablename__ = "market_entities"
     __table_args__ = (
-        UniqueConstraint("normalized_name", "entity_type", name="uq_entities_normalized_type"),
+        UniqueConstraint("normalized_name", "entity_type", name="uq_market_entities_normalized_type"),
+        Index("ix_market_entities_entity_type", "entity_type"),
     )
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -33,20 +34,20 @@ class Entity(UUIDPrimaryKeyMixin, Base):
 
 
 class ArticleEntity(UUIDPrimaryKeyMixin, Base):
-    __tablename__ = "article_entities"
+    __tablename__ = "document_entities"
     __table_args__ = (
-        UniqueConstraint("article_id", "entity_id", name="uq_article_entities_article_entity"),
+        UniqueConstraint("article_id", "entity_id", name="uq_document_entities_article_entity"),
     )
 
     article_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
-        ForeignKey("articles.id", ondelete="CASCADE"),
+        ForeignKey("crawled_documents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     entity_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
-        ForeignKey("entities.id", ondelete="CASCADE"),
+        ForeignKey("market_entities.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )

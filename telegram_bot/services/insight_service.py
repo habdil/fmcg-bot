@@ -45,7 +45,7 @@ def alert_messages(
     _crawl_before_response(crawl_first, max_sources, max_articles_per_source)
     rows = get_high_urgency_alerts(limit=limit)
     if not rows:
-        return ["Belum ada high urgency FMCG alert."]
+        return ["Belum ada high urgency Sorota alert."]
     return [format_early_warning_alert(row) for row in rows]
 
 
@@ -93,7 +93,7 @@ def build_keyword_trend_summary(keyword: str, rows: list[dict[str, Any]]) -> str
     if not rows:
         return (
             f"Belum ada insight untuk: {keyword}\n\n"
-            "Jalankan /crawl dulu, lalu coba lagi. Contoh: /crawl 3"
+            "Aku belum punya bahan yang cukup. Coba update sumber dulu dengan /crawl 3."
         )
 
     counts = _signal_counts(rows)
@@ -121,20 +121,20 @@ def build_keyword_trend_summary(keyword: str, rows: list[dict[str, Any]]) -> str
     lines = [
         f"Insight untuk: {keyword}",
         "",
-        f"Jumlah signal: {len(rows)}",
+        f"Jumlah temuan: {len(rows)}",
         f"Rata-rata impact: {avg_impact}",
         f"Rata-rata confidence: {avg_confidence}",
         f"High urgency: {high_urgency_count}",
         "",
-        "Arah signal:",
+        "Arah indikasi:",
         f"- Harga: {price_direction}",
-        f"- Supply/distribusi: {shortage_risk_count} signal risiko",
+        f"- Supply/distribusi: {shortage_risk_count} indikasi risiko",
         f"- Demand: {demand_direction}",
         f"- Sentiment: {sentiment_direction}",
         "",
         f"Outlook: {outlook}",
         "",
-        "Signal terbanyak:",
+        "Indikasi terbanyak:",
     ]
     lines.extend(f"- {signal_type}: {count}" for signal_type, count in counts.most_common(6))
 
@@ -149,7 +149,7 @@ def build_keyword_trend_summary(keyword: str, rows: list[dict[str, Any]]) -> str
         lines.append(f"- {signal} | {source} | {title}")
 
     lines.append("")
-    lines.append("Catatan: outlook ini rule-based dari artikel publik yang sudah tersimpan, bukan forecast numerik.")
+    lines.append("Catatan: outlook ini memakai artikel publik yang tersedia, bukan forecast numerik.")
     return "\n".join(lines)
 
 
@@ -173,7 +173,7 @@ def keyword_forecast_message(
     if not rows:
         return (
             f"Belum ada data untuk membuat outlook: {keyword}\n\n"
-            "Jalankan /crawl dulu, lalu coba lagi. Contoh: /crawl 3"
+            "Aku belum punya bahan yang cukup. Coba update sumber dulu dengan /crawl 3."
         )
 
     counts = _signal_counts(rows)
@@ -189,7 +189,7 @@ def keyword_forecast_message(
     if counts["regulation_change"]:
         actions.append("cek implikasi regulasi ke procurement, pricing, dan distribusi")
     if not actions:
-        actions.append("lanjutkan monitoring karena arah signal belum kuat")
+        actions.append("lanjutkan monitoring karena arah indikasi belum kuat")
 
     lines = [
         f"Rule-based outlook untuk: {keyword}",
@@ -210,8 +210,8 @@ def trending_message(
 ) -> str:
     _crawl_before_response(crawl_first, max_sources, max_articles_per_source)
     data = trending()
-    lines = ["Trending FMCG Signals"]
-    lines.append("\nSignals")
+    lines = ["Trending Sorota Business Updates"]
+    lines.append("\nIndikasi")
     if data["signals"]:
         lines.extend(f"- {row['signal_type']}: {row['count']}" for row in data["signals"])
     else:

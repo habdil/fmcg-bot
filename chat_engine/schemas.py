@@ -49,6 +49,9 @@ class UserContext:
     style_instructions: str | None = None
     business_context: str | None = None
     risk_preference: str | None = None
+    # Set when the user is correcting a previous answer.  The composer will
+    # treat this as an override instruction and re-generate accordingly.
+    feedback_instruction: str | None = None
 
 
 @dataclass(frozen=True)

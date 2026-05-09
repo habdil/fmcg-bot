@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from crawling_bot.processors.entity_extractor import flatten_entities
@@ -29,13 +30,30 @@ def _get_or_create_entity(session: Session, item: EntityItem) -> Entity:
         )
     )
     if entity is None:
-        entity = Entity(
-            name=item.name,
-            entity_type=item.entity_type,
-            normalized_name=item.normalized_name,
+        statement = (
+            insert(Entity)
+            .values(
+                name=item.name,
+                entity_type=item.entity_type,
+                normalized_name=item.normalized_name,
+            )
+            .on_conflict_do_nothing(
+                index_elements=["normalized_name", "entity_type"],
+            )
+            .returning(Entity.id)
         )
-        session.add(entity)
-        session.flush()
+        entity_id = session.scalar(statement)
+        if entity_id is not None:
+            entity = session.get(Entity, entity_id)
+        if entity is None:
+            entity = session.scalar(
+                select(Entity).where(
+                    Entity.normalized_name == item.normalized_name,
+                    Entity.entity_type == item.entity_type,
+                )
+            )
+    if entity is None:
+        raise RuntimeError(f"Failed to create entity {item.normalized_name}/{item.entity_type}")
     return entity
 
 

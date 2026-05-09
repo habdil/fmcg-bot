@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Optional
 
@@ -205,10 +206,21 @@ def run_crawler(
         logger.warning("No active sources found. Run scripts/seed_sources.py first.")
         return []
 
+    # Proses sumber secara paralel agar tidak sequential (beda 30s vs 10s)
+    max_workers = min(len(sources), 4)
+    logger.info("Crawling %d sources with %d parallel workers", len(sources), max_workers)
     results: list[SourceStats] = []
-    for source in sources:
-        logger.info("Crawling source: %s", source.name)
-        results.append(process_source(source, max_articles=max_articles_per_source))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_source = {
+            executor.submit(process_source, source, max_articles_per_source): source
+            for source in sources
+        }
+        for future in as_completed(future_to_source):
+            source = future_to_source[future]
+            try:
+                results.append(future.result())
+            except Exception as exc:
+                logger.error("Source crawl thread failed for %s: %s", source.name, exc)
     return results
 
 

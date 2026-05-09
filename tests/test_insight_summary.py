@@ -27,8 +27,8 @@ def test_keyword_trend_summary_builds_operational_outlook() -> None:
 
     assert "Insight untuk: gula" in message
     assert "Harga: cenderung naik" in message
-    assert "price_increase: 1" in message
-    assert "shortage: 1" in message
+    assert "Jumlah temuan: 2" in message
+    assert "Indikasi terbanyak:" in message
 
 
 def test_product_deep_analysis_crawls_before_query(monkeypatch) -> None:
@@ -69,4 +69,4 @@ def test_product_deep_analysis_crawls_before_query(monkeypatch) -> None:
     message = insight_service.product_deep_analysis_message("gula", polish=False)
 
     assert calls == ["crawl", "query"]
-    assert "Brief Intelijen FMCG" in message
+    assert "Brief Keputusan Bisnis Sorota" in message

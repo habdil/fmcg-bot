@@ -4,7 +4,8 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,14 +13,17 @@ from database_migration.models.base import Base, UUIDPrimaryKeyMixin, utc_now
 
 
 class Signal(UUIDPrimaryKeyMixin, Base):
-    __tablename__ = "signals"
+    __tablename__ = "evidence_items"
     __table_args__ = (
         CheckConstraint("severity >= 1 AND severity <= 5", name="severity_range"),
+        Index("ix_evidence_items_created_at", "created_at"),
+        Index("ix_evidence_items_product", "product"),
+        Index("ix_evidence_items_location", "location"),
     )
 
     article_id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True),
-        ForeignKey("articles.id", ondelete="CASCADE"),
+        ForeignKey("crawled_documents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -33,6 +37,7 @@ class Signal(UUIDPrimaryKeyMixin, Base):
     reason: Mapped[Optional[str]] = mapped_column(Text)
     evidence_text: Mapped[Optional[str]] = mapped_column(Text)
     explanation: Mapped[Optional[str]] = mapped_column(Text)
+    extracted_facts: Mapped[Optional[dict]] = mapped_column(JSONB)
     source_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     related_article_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

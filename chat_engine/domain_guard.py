@@ -12,11 +12,19 @@ logger = logging.getLogger(__name__)
 BUSINESS_TERMS = [
     "bisnis",
     "usaha",
+    "umkm",
     "dagang",
-    "fmcg",
     "harga",
+    "harga jual",
+    "hpp",
+    "margin",
+    "markup",
+    "laba",
+    "profit",
+    "omzet",
     "stok",
     "stock",
+    "restock",
     "pasokan",
     "supply",
     "demand",
@@ -31,6 +39,16 @@ BUSINESS_TERMS = [
     "market",
     "pasar",
     "produk",
+    "kompetitor",
+    "pesaing",
+    "customer",
+    "pelanggan",
+    "kuliner",
+    "laundry",
+    "fashion",
+    "coffee shop",
+    "reseller",
+    "kemasan",
     "komoditas",
     "inflasi",
     "daya beli",
@@ -82,8 +100,8 @@ NON_BUSINESS_PATTERNS = [
 ]
 
 REFUSAL_MESSAGE = (
-    "Maaf, saya hanya bisa membantu pertanyaan terkait bisnis, FMCG, distribusi, "
-    "harga, stok, demand, supply, market intelligence, dan keputusan operasional."
+    "Maaf, saya hanya bisa membantu pertanyaan terkait bisnis UMKM, harga, margin, "
+    "HPP, supplier, kompetitor, stok, demand, supply, pasar, dan keputusan operasional."
 )
 
 
@@ -99,10 +117,10 @@ class BusinessDomainGuard:
             return fallback
 
         prompt = (
-            "You are a strict domain guard for a business intelligence chatbot.\n"
-            "Return whether the user message is related to business, FMCG, retail, distribution, "
-            "pricing, stock, supply chain, demand, market intelligence, regulation, commodities, "
-            "operational decisions, or business news.\n"
+            "You are a strict domain guard for Sorota, an Indonesian MSME business decision assistant.\n"
+            "Return whether the user message is related to MSME business, pricing, margin, COGS/HPP, "
+            "retail, distribution, supplier search, stock, supply chain, demand, market intelligence, "
+            "competitors, regulation, commodities, operational decisions, or business news.\n"
             "If the user asks generic 'berita terbaru', 'headline terbaru', or 'latest news' without "
             "another topic, treat it as a request for business news because this bot's default domain "
             "is business intelligence.\n"

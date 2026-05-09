@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
@@ -23,8 +25,11 @@ def upsert_source(
     name: str,
     url: str,
     source_type: str = "rss",
+    source_category: str = "market_intelligence",
     credibility_score: float = 0.5,
     is_active: bool = True,
+    notes: str | None = None,
+    config_json: dict[str, Any] | None = None,
 ) -> Source:
     source = session.scalar(select(Source).where(Source.name == name))
     if source is None:
@@ -32,6 +37,9 @@ def upsert_source(
         session.add(source)
     source.url = url
     source.source_type = source_type
+    source.source_category = source_category
     source.credibility_score = credibility_score
     source.is_active = is_active
+    source.notes = notes
+    source.config_json = config_json
     return source

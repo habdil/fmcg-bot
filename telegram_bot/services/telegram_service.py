@@ -15,12 +15,39 @@ def is_allowed_chat(chat_id: int | str | None) -> bool:
     return not allowed or str(chat_id) in allowed
 
 
+def is_admin_chat(chat_id: int | str | None) -> bool:
+    """Return True jika chat_id terdaftar sebagai admin.
+
+    Jika TELEGRAM_ADMIN_CHAT_IDS tidak diset di .env, semua allowed chat
+    dianggap admin (backward-compatible untuk setup single-user).
+    """
+    if chat_id is None:
+        return False
+    admins = settings.admin_chat_ids
+    if not admins:
+        # Fallback: kalau admin list kosong, pakai allowed_chat_ids
+        return is_allowed_chat(chat_id)
+    return str(chat_id) in admins
+
+
 async def reject_if_not_allowed(update: Update) -> bool:
     chat = update.effective_chat
     if chat and is_allowed_chat(chat.id):
         return False
     if update.effective_message:
         await update.effective_message.reply_text("Chat ini belum diizinkan untuk memakai bot.")
+    return True
+
+
+async def reject_if_not_admin(update: Update) -> bool:
+    """Reject request kalau bukan dari admin. Return True berarti ditolak."""
+    chat = update.effective_chat
+    if chat and is_admin_chat(chat.id):
+        return False
+    if update.effective_message:
+        await update.effective_message.reply_text(
+            "Perintah ini hanya untuk admin bot."
+        )
     return True
 
 
@@ -32,7 +59,7 @@ def format_alert(row: dict[str, Any]) -> str:
     summary = row.get("ai_polished_summary") or "-"
     source = f"{row.get('source_name')} - {row.get('title')}"
     return (
-        "<b>FMCG Business Alert</b>\n\n"
+        "<b>Sorota Business Alert</b>\n\n"
         f"Product: {escape(product)}\n"
         f"Urgency: {escape(str(row.get('urgency', '-')).upper())}\n"
         f"Signal: {escape(str(row.get('signal_type', '-')))}\n\n"
